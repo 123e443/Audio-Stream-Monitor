@@ -1,15 +1,13 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { spawn } from "child_process";
-import ffmpeg from "fluent-ffmpeg";
-import path from "path";
-import fs from "fs";
 
-// Mocking the Whisper node wrapper for now to ensure stability in the initial build
-// In a production environment with proper C++ build tools, we would import 'nodejs-whisper'
-// or use the 'whisper-node' package.
-// For this MVP, we will simulate transcription to demonstrate the architecture 
-// or try to use a CLI if available.
+interface StreamLocation {
+  latitude: number;
+  longitude: number;
+  city: string;
+}
+
+const STREAM_LOCATIONS: Record<number, StreamLocation> = {};
 
 export class MonitorManager {
   private activeMonitors: Map<number, any> = new Map();
@@ -19,7 +17,7 @@ export class MonitorManager {
     this.wss = wss;
   }
 
-  startMonitoring(streamId: number, streamUrl: string) {
+  async startMonitoring(streamId: number, streamUrl: string) {
     if (this.activeMonitors.has(streamId)) {
       console.log(`Stream ${streamId} already being monitored`);
       return;
@@ -27,20 +25,20 @@ export class MonitorManager {
 
     console.log(`Starting monitor for stream ${streamId}: ${streamUrl}`);
 
-    // Update status to active
+    const stream = await storage.getStream(streamId);
+    if (stream && stream.latitude && stream.longitude && stream.city) {
+      STREAM_LOCATIONS[streamId] = {
+        latitude: stream.latitude,
+        longitude: stream.longitude,
+        city: stream.city
+      };
+    }
+
     storage.updateStreamStatus(streamId, 'active');
 
-    // In a real whisper.cpp implementation:
-    // 1. ffmpeg stream -> convert to 16khz wav chunks
-    // 2. feed chunks to whisper process
-    // 3. get stdout text -> db
-
-    // Simulation for reliability in this demo environment:
     const interval = setInterval(async () => {
-      // Mock transcription generation
-      // In reality, this would be the callback from the whisper process
       await this.generateMockTranscription(streamId);
-    }, 5000); // New line every 5 seconds
+    }, 5000);
 
     this.activeMonitors.set(streamId, interval);
   }
@@ -56,35 +54,68 @@ export class MonitorManager {
   }
 
   private async generateMockTranscription(streamId: number) {
-    // Simulated radio chatter
-    const mockPhrases = [
-      "Unit 10-4, proceeding to location.",
-      "Dispatch, we have a code 3 on Main St.",
-      "Suspect describes as male, late 20s, red hoodie.",
-      "Fire department arriving on scene.",
-      "EMS requested at 405 highway.",
-      "Status check on unit 4.",
-      "Clear the channel for emergency traffic.",
-      "Suspect in custody.",
-      "Traffic stop at 5th and Elm.",
-      "Copy that, 10-4."
+    const mockCalls = [
+      { content: "Unit 10-4, proceeding to location.", callType: "Dispatch" },
+      { content: "Dispatch, we have a code 3 on Main St.", callType: "Emergency" },
+      { content: "Suspect described as male, late 20s, red hoodie.", callType: "BOLO" },
+      { content: "Fire department arriving on scene.", callType: "Fire" },
+      { content: "EMS requested at 405 highway.", callType: "Medical" },
+      { content: "Status check on unit 4.", callType: "Status" },
+      { content: "Clear the channel for emergency traffic.", callType: "Priority" },
+      { content: "Suspect in custody.", callType: "Arrest" },
+      { content: "Traffic stop at 5th and Elm.", callType: "Traffic" },
+      { content: "Copy that, 10-4.", callType: "Acknowledgment" },
+      { content: "Structure fire reported, multiple units responding.", callType: "Fire" },
+      { content: "Medical emergency, cardiac arrest.", callType: "Medical" },
+      { content: "Vehicle collision, requesting traffic control.", callType: "Traffic" },
+      { content: "Burglary in progress, silent approach.", callType: "Crime" },
     ];
     
-    const content = mockPhrases[Math.floor(Math.random() * mockPhrases.length)];
+    const mockAddresses = [
+      "123 Main Street",
+      "456 Oak Avenue",
+      "789 Park Boulevard",
+      "101 First Street",
+      "202 Second Avenue",
+      "303 Third Street",
+      "404 Fourth Avenue",
+      "505 Fifth Street",
+      "1200 Industrial Way",
+      "850 Commerce Drive",
+    ];
+
+    const call = mockCalls[Math.floor(Math.random() * mockCalls.length)];
+    const address = mockAddresses[Math.floor(Math.random() * mockAddresses.length)];
+    
+    const location = STREAM_LOCATIONS[streamId];
+    let lat: number | undefined;
+    let lng: number | undefined;
+    
+    if (location) {
+      lat = location.latitude + (Math.random() - 0.5) * 0.05;
+      lng = location.longitude + (Math.random() - 0.5) * 0.05;
+    }
     
     const transcription = await storage.createTranscription({
       streamId,
-      content,
-      confidence: 95,
+      content: call.content,
+      confidence: 90 + Math.floor(Math.random() * 10),
+      latitude: lat,
+      longitude: lng,
+      address: address,
+      callType: call.callType,
     });
 
-    // Broadcast to connected clients
     this.broadcast({
       type: 'transcription',
       payload: {
         streamId,
         content: transcription.content,
-        timestamp: transcription.timestamp?.toISOString()
+        timestamp: transcription.timestamp?.toISOString(),
+        latitude: transcription.latitude,
+        longitude: transcription.longitude,
+        address: transcription.address,
+        callType: transcription.callType,
       }
     });
   }

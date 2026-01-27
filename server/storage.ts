@@ -1,6 +1,6 @@
 import { streams, transcriptions, type Stream, type InsertStream, type Transcription, type InsertTranscription } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, isNotNull, and } from "drizzle-orm";
 
 export interface IStorage {
   getStreams(): Promise<Stream[]>;
@@ -9,6 +9,7 @@ export interface IStorage {
   updateStreamStatus(id: number, status: string): Promise<Stream>;
   
   getTranscriptions(streamId: number, limit?: number): Promise<Transcription[]>;
+  getAllTranscriptions(limit?: number, withLocation?: boolean): Promise<Transcription[]>;
   createTranscription(transcription: InsertTranscription): Promise<Transcription>;
 }
 
@@ -39,6 +40,23 @@ export class DatabaseStorage implements IStorage {
     return await db.select()
       .from(transcriptions)
       .where(eq(transcriptions.streamId, streamId))
+      .orderBy(desc(transcriptions.timestamp))
+      .limit(limit);
+  }
+
+  async getAllTranscriptions(limit = 100, withLocation = false): Promise<Transcription[]> {
+    if (withLocation) {
+      return await db.select()
+        .from(transcriptions)
+        .where(and(
+          isNotNull(transcriptions.latitude),
+          isNotNull(transcriptions.longitude)
+        ))
+        .orderBy(desc(transcriptions.timestamp))
+        .limit(limit);
+    }
+    return await db.select()
+      .from(transcriptions)
       .orderBy(desc(transcriptions.timestamp))
       .limit(limit);
   }

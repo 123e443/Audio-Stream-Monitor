@@ -64,7 +64,18 @@ export const api = {
       path: '/api/streams/:id/transcriptions',
       input: z.object({
         limit: z.coerce.number().optional().default(50),
-        cursor: z.coerce.number().optional(), // ID based cursor
+        cursor: z.coerce.number().optional(),
+      }).optional(),
+      responses: {
+        200: z.array(z.custom<typeof transcriptions.$inferSelect>()),
+      },
+    },
+    all: {
+      method: 'GET' as const,
+      path: '/api/transcriptions',
+      input: z.object({
+        limit: z.coerce.number().optional().default(100),
+        withLocation: z.coerce.boolean().optional().default(false),
       }).optional(),
       responses: {
         200: z.array(z.custom<typeof transcriptions.$inferSelect>()),
@@ -79,6 +90,10 @@ export const ws = {
       streamId: z.number(),
       content: z.string(),
       timestamp: z.string(),
+      latitude: z.number().optional(),
+      longitude: z.number().optional(),
+      address: z.string().optional(),
+      callType: z.string().optional(),
     })
   }
 };

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Radio, Activity, LayoutDashboard, Settings } from "lucide-react";
+import { Radio, Activity, LayoutDashboard, Settings, Map } from "lucide-react";
 
 export function Header() {
   const [location] = useLocation();
@@ -22,16 +22,23 @@ export function Header() {
         </div>
 
         <nav className="flex items-center gap-1">
-          <Link href="/">
-            <a className={`
-              px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2
-              ${location === "/" 
-                ? "bg-primary/10 text-primary" 
-                : "text-muted-foreground hover:text-white hover:bg-white/5"}
-            `}>
-              <LayoutDashboard className="w-4 h-4" />
-              Dashboard
-            </a>
+          <Link href="/" className={`
+            px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2
+            ${location === "/" 
+              ? "bg-primary/10 text-primary" 
+              : "text-muted-foreground hover:text-white hover:bg-white/5"}
+          `}>
+            <LayoutDashboard className="w-4 h-4" />
+            Dashboard
+          </Link>
+          <Link href="/map" className={`
+            px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2
+            ${location === "/map" 
+              ? "bg-primary/10 text-primary" 
+              : "text-muted-foreground hover:text-white hover:bg-white/5"}
+          `}>
+            <Map className="w-4 h-4" />
+            Map
           </Link>
           <div className="w-px h-4 bg-border/50 mx-2" />
           <div className="px-3 py-1.5 rounded-full bg-secondary/50 border border-white/5 flex items-center gap-2">

@@ -13,7 +13,6 @@ export async function registerRoutes(
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   const monitorManager = new MonitorManager(wss);
 
-  // Restore active streams on startup & SEED if empty
   const streams = await storage.getStreams();
   
   if (streams.length === 0) {
@@ -21,37 +20,52 @@ export async function registerRoutes(
     const seedStreams = [
       {
         name: "Chicago Police Zone 10",
-        url: "https://broadcastify.cdnstream1.com/31652", // Example URL
+        url: "https://broadcastify.cdnstream1.com/31652",
         category: "Police",
         description: "Districts 10 and 11",
-        status: "active"
+        latitude: 41.8781,
+        longitude: -87.6298,
+        city: "Chicago, IL"
       },
       {
         name: "FDNY Brooklyn",
         url: "https://broadcastify.cdnstream1.com/9358",
         category: "Fire",
         description: "Brooklyn Fire Dispatch",
-        status: "active"
+        latitude: 40.6782,
+        longitude: -73.9442,
+        city: "Brooklyn, NY"
       },
       {
         name: "LA Fire Department",
         url: "https://broadcastify.cdnstream1.com/2846", 
         category: "Fire",
         description: "Metro Fire",
-        status: "inactive"
+        latitude: 34.0522,
+        longitude: -118.2437,
+        city: "Los Angeles, CA"
+      },
+      {
+        name: "Calgary Municipal Radio Network",
+        url: "https://broadcastify.cdnstream1.com/38040",
+        category: "Fire",
+        description: "Calgary Fire Department dispatch and scene communications",
+        latitude: 51.0447,
+        longitude: -114.0719,
+        city: "Calgary, AB"
       }
     ];
 
     for (const s of seedStreams) {
       const created = await storage.createStream(s);
-      if (created.status === 'active') {
-        monitorManager.startMonitoring(created.id, created.url);
+      if (s.name !== "LA Fire Department") {
+        await monitorManager.startMonitoring(created.id, created.url);
       }
     }
   } else {
     for (const stream of streams) {
       if (stream.status === 'active') {
-        monitorManager.startMonitoring(stream.id, stream.url);
+        await monitorManager.startMonitoring(stream.id, stream.url);
       }
     }
   }
@@ -73,8 +87,7 @@ export async function registerRoutes(
     try {
       const input = api.streams.create.input.parse(req.body);
       const stream = await storage.createStream(input);
-      // Auto-start monitoring if created
-      monitorManager.startMonitoring(stream.id, stream.url);
+      await monitorManager.startMonitoring(stream.id, stream.url);
       res.status(201).json(stream);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -94,7 +107,7 @@ export async function registerRoutes(
     const stream = await storage.updateStreamStatus(id, status);
     
     if (status === 'active') {
-      monitorManager.startMonitoring(id, stream.url);
+      await monitorManager.startMonitoring(id, stream.url);
     } else {
       monitorManager.stopMonitoring(id);
     }
@@ -111,6 +124,13 @@ export async function registerRoutes(
     const streamId = Number(req.params.id);
     const limit = Number(req.query.limit) || 50;
     const items = await storage.getTranscriptions(streamId, limit);
+    res.json(items);
+  });
+
+  app.get(api.transcriptions.all.path, async (req, res) => {
+    const limit = Number(req.query.limit) || 100;
+    const withLocation = req.query.withLocation === 'true';
+    const items = await storage.getAllTranscriptions(limit, withLocation);
     res.json(items);
   });
 

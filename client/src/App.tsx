@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/Dashboard";
 import StreamDetail from "@/pages/StreamDetail";
+import MapView from "@/pages/MapView";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,6 +13,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/streams/:id" component={StreamDetail} />
+      <Route path="/map" component={MapView} />
       <Route component={NotFound} />
     </Switch>
   );
