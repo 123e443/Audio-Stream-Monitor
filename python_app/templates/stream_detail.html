@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="stream-hero" data-stream-id="{{ stream.id }}">
+    <div>
+      <a class="btn ghost" href="/">Back to Dashboard</a>
+      <h1>{{ stream.name }}</h1>
+      <p class="muted">{{ stream.description or "No description provided." }}</p>
+      <p class="meta">
+        <span class="tag">{{ stream.category }}</span>
+        <span class="divider">|</span>
+        <span>{{ stream.url }}</span>
+      </p>
+    </div>
+    <div class="stream-controls">
+      <div class="audio-wrap">
+        <audio controls src="{{ stream.url }}"></audio>
+      </div>
+      <div class="stream-actions">
+        <button class="btn secondary js-toggle" data-id="{{ stream.id }}" data-status="{{ stream.status }}">
+          {{ "Pause" if stream.status == "active" else "Start" }}
+        </button>
+        <button class="btn ghost js-delete" data-id="{{ stream.id }}">Delete</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="stream-grid">
+    <div class="panel">
+      <h2>Live Transcriptions</h2>
+      <div class="log" id="transcription-log">
+        <div class="log-empty">Waiting for audio activity...</div>
+      </div>
+    </div>
+    <div class="panel diagnostics">
+      <h2>Signal Diagnostics</h2>
+      <div class="diag-grid">
+        <div>
+          <p class="label">Status</p>
+          <p class="value">{{ stream.status }}</p>
+        </div>
+        <div>
+          <p class="label">Category</p>
+          <p class="value">{{ stream.category }}</p>
+        </div>
+        <div>
+          <p class="label">City</p>
+          <p class="value">{{ stream.city or "Unknown" }}</p>
+        </div>
+        <div>
+          <p class="label">Signal</p>
+          <p class="value">Encrypted</p>
+        </div>
+      </div>
+      <div class="pulse-card">
+        <p class="label">Live Pulse</p>
+        <div class="pulse-bar">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

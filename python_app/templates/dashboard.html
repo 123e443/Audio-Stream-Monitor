@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Live Operations</p>
+      <h1>Active Audio Channels</h1>
+      <p class="subhead">
+        Monitor public safety broadcasts, capture AI transcriptions, and route signals in real time.
+      </p>
+    </div>
+    <div class="hero-panel">
+      <form id="create-stream-form">
+        <h2>Create Stream</h2>
+        <div class="field-grid">
+          <label>
+            <span>Name</span>
+            <input name="name" placeholder="Metro Dispatch" required />
+          </label>
+          <label>
+            <span>URL</span>
+            <input name="url" placeholder="https://..." required />
+          </label>
+          <label>
+            <span>Category</span>
+            <input name="category" placeholder="Police, Fire, EMS" />
+          </label>
+          <label>
+            <span>City</span>
+            <input name="city" placeholder="Chicago, IL" />
+          </label>
+          <label class="full">
+            <span>Description</span>
+            <input name="description" placeholder="District 10 and 11" />
+          </label>
+          <label>
+            <span>Latitude</span>
+            <input name="latitude" type="number" step="0.0001" placeholder="41.8781" />
+          </label>
+          <label>
+            <span>Longitude</span>
+            <input name="longitude" type="number" step="0.0001" placeholder="-87.6298" />
+          </label>
+        </div>
+        <button class="btn primary" type="submit">Activate Monitor</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="search">
+      <input id="stream-search" placeholder="Search by name or description" />
+    </div>
+    <div class="filters" id="category-filters">
+      <button class="chip active" data-category="All">All</button>
+      <button class="chip" data-category="Police">Police</button>
+      <button class="chip" data-category="Fire">Fire</button>
+      <button class="chip" data-category="EMS">EMS</button>
+      <button class="chip" data-category="Weather">Weather</button>
+      <button class="chip" data-category="Medical">Medical</button>
+    </div>
+  </section>
+
+  <section class="streams-grid" id="streams-grid">
+    {% if streams %}
+      {% for stream in streams %}
+        <article
+          class="stream-card"
+          data-id="{{ stream.id }}"
+          data-name="{{ stream.name | lower }}"
+          data-description="{{ (stream.description or '') | lower }}"
+          data-category="{{ stream.category }}"
+        >
+          <div class="card-top">
+            <div>
+              <h3>{{ stream.name }}</h3>
+              <p class="muted">{{ stream.description or "No description provided." }}</p>
+              <p class="meta">
+                <span class="tag">{{ stream.category }}</span>
+                {% if stream.city %}
+                  <span class="divider">|</span>
+                  <span>{{ stream.city }}</span>
+                {% endif %}
+              </p>
+            </div>
+            <div class="status {{ 'active' if stream.status == 'active' else 'idle' }}">
+              {{ stream.status }}
+            </div>
+          </div>
+          <div class="card-actions">
+            <a class="btn ghost" href="/streams/{{ stream.id }}">Open</a>
+            <button class="btn secondary js-toggle" data-id="{{ stream.id }}" data-status="{{ stream.status }}">
+              {{ "Pause" if stream.status == "active" else "Start" }}
+            </button>
+            <button class="btn ghost js-delete" data-id="{{ stream.id }}">Delete</button>
+          </div>
+        </article>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <p>No streams yet. Create one to begin monitoring.</p>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

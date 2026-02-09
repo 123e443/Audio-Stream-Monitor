@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block head %}
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-o9N1j7kGStb+4xDfsD9yZ5e0mR8tP5xgG1rZbM6bWXM="
+    crossorigin=""
+  />
+{% endblock %}
+{% block content %}
+  <section class="map-header">
+    <div>
+      <p class="eyebrow">Geo Pulse</p>
+      <h1>Live Activity Map</h1>
+      <p class="subhead">Visualize streaming transcriptions pinned across the region.</p>
+    </div>
+    <div class="filters" id="calltype-filters">
+      <button class="chip active" data-calltype="All">All</button>
+    </div>
+  </section>
+  <section class="map-shell">
+    <div id="map" class="map"></div>
+    <div class="map-legend">
+      <h3>Call Types</h3>
+      <div id="legend-items"></div>
+    </div>
+  </section>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-oB5fY7kP5vU9mNhZ9er6QyA24G9Hyg11WxoVxgRkYxM="
+    crossorigin=""
+  ></script>
+{% endblock %}

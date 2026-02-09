@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Audio Pulse Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}" />
+    {% block head %}{% endblock %}
+  </head>
+  <body data-page="{{ page }}">
+    <div class="scanlines"></div>
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand-mark">AP</div>
+        <div>
+          <p class="brand-title">Audio Pulse</p>
+          <p class="brand-subtitle">Stream Intelligence Console</p>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a class="nav-link" href="/">Dashboard</a>
+        <a class="nav-link" href="/map">Map</a>
+      </nav>
+    </header>
+
+    <main class="site-main">
+      {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', path='app.js') }}"></script>
+  </body>
+</html>
