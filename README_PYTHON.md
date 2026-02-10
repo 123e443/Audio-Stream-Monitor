@@ -40,7 +40,7 @@ setx GEOCODE_ENABLED "true"
 ```
 
 On first run you must download a Whisper model (for example `ggml-base.en.bin`)
-into `F:\whisper.cpp\models` or point `WHISPER_MODEL` to the correct file.
+into `.\whisper.cpp\models` or point `WHISPER_MODEL` to the correct file.
 Geocoding uses the public Nominatim service; disable with `GEOCODE_ENABLED=false`
 if you do not want external lookup.
 
