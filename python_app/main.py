@@ -50,6 +50,15 @@ def _seed_streams() -> list[int]:
 
     seed_streams = [
         {
+            "name": "Broadcastify Stream 41811",
+            "url": "https://broadcastify.cdnstream1.com/41811",
+            "category": "Police",
+            "description": "Requested live audio stream",
+            "latitude": None,
+            "longitude": None,
+            "city": None,
+        },
+        {
             "name": "Chicago Police Zone 10",
             "url": "https://broadcastify.cdnstream1.com/31652",
             "category": "Police",
@@ -90,7 +99,7 @@ def _seed_streams() -> list[int]:
     started_ids: list[int] = []
     for seed in seed_streams:
         stream = create_stream(StreamCreate(**seed))
-        if seed["name"] != "LA Fire Department":
+        if seed["name"] not in {"LA Fire Department"}:
             started_ids.append(stream.id)
 
     return started_ids

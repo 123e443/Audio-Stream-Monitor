@@ -25,6 +25,25 @@ uvicorn python_app.main:app --reload --port 5000
 http://localhost:5000
 ```
 
+## Whisper.cpp + ffmpeg setup
+
+The Python monitor uses `ffmpeg` to capture audio segments and `whisper-cli.exe`
+to transcribe them. Ensure both are available and set these environment variables
+if your paths differ:
+
+```
+setx FFMPEG_BIN "C:\path\to\ffmpeg.exe"
+setx WHISPER_BIN "F:\whisper.cpp\build\bin\Release\whisper-cli.exe"
+setx WHISPER_MODEL "F:\whisper.cpp\models\ggml-base.en.bin"
+setx SEGMENT_SECONDS "15"
+setx GEOCODE_ENABLED "true"
+```
+
+On first run you must download a Whisper model (for example `ggml-base.en.bin`)
+into `F:\whisper.cpp\models` or point `WHISPER_MODEL` to the correct file.
+Geocoding uses the public Nominatim service; disable with `GEOCODE_ENABLED=false`
+if you do not want external lookup.
+
 ## Notes
 
 - Uses SQLite by default (`python_app/app.db`). Set `DATABASE_URL` to use Postgres.
